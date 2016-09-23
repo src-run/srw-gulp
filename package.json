@@ -1,0 +1,87 @@
+{
+  "name": "srw-app",
+  "version": "0.1.0",
+  "description": "The core Symfony-based web application powering src-run's primary domain.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/src-run/srw-app.git"
+  },
+  "keywords": [
+    "sr",
+    "src-run",
+    "web-app"
+  ],
+  "author": "Rob Frawley 2nd <rmf@src.run>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/src-run/srw-app/issues"
+  },
+  "homepage": "https://github.com/src-run/srw-app#readme",
+  "devDependencies": {
+    "babel-cli": "~6.14",
+    "babel-core": "~6.14",
+    "babel-loader": "~6.2",
+    "babel-plugin-transform-runtime": "~6.12",
+    "babel-polyfill": "~6.13",
+    "babel-preset-es2015": "~6.14",
+    "babel-register": "~6.14",
+    "babelify": "~7.3",
+    "bower": "~1.7",
+    "browserify": "~13.1",
+    "browserify-shim": "~3.8",
+    "del": "~2.2",
+    "filesystem": "~1.0",
+    "gulp": "gulpjs/gulp.git#4.0",
+    "gulp-banner": "~0.1",
+    "gulp-concat": "~2.6",
+    "gulp-concat-sourcemap": "~1.3",
+    "gulp-decomment": "~0.1",
+    "gulp-jscs": "~4.0",
+    "gulp-load-plugins": "~1.2",
+    "gulp-postcss": "^6.2.0",
+    "gulp-rename": "~1.2",
+    "gulp-sass": "~2.3",
+    "gulp-sourcemaps": "~1.6",
+    "gulp-uglify": "~2.0.0",
+    "gulp-watch": "~4.3",
+    "jquery": "~3.1",
+    "vinyl-buffer": "~1.0",
+    "vinyl-source-stream": "~1.1",
+    "babel-preset-es2016": "^6.11.3",
+    "babel-preset-stage-0": "^6.5.0",
+    "colour": "^0.7.1",
+    "postcss-clean": "^1.0.2",
+    "postcss-flexbugs-fixes": "^2.0.0",
+    "postcss-cssnext": "^2.8.0",
+    "postcss-media-minmax": "^2.1.2",
+    "postcss-reporter": "^1.4.1",
+    "postcss-scss": "^0.3.0",
+    "postcss-short": "^1.4.0",
+    "postcss-sorting": "^1.6.1",
+    "postcss-strip-inline-comments": "^0.1.5",
+    "postcss-utilities": "^0.4.0",
+    "rename": "^1.0.3",
+    "sprintf-js": "^1.0.3",
+    "stylelint": "^7.3.1"
+  },
+  "browserify-shim": {
+    "jquery": "$"
+  },
+  "browserify": {
+    "transform": [
+      "browserify-shim"
+    ]
+  },
+  "scripts": {
+    "fetch": "bower update",
+    "prune": "bower prune",
+    "clean": "gulp clean",
+    "build": "gulp build",
+    "watch": "gulp default",
+    "test": "gulp tests"
+  }
+}
