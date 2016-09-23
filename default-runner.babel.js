@@ -132,9 +132,6 @@ gulp.task('make-styles', () => {
       require('postcss-cssnext')({
         browsers: configs.option('browser-support')
       }),
-      require('autoprefixer')({
-        browsers: configs.option('browser-support')
-      }),
       require('postcss-flexbugs-fixes'),
       require('postcss-sorting')({
         "sort-order": configs.option('sort-order')
