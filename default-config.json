@@ -1,0 +1,74 @@
+{
+  "paths" : {
+    "components" : "web/components/",
+    "app"        : "web/bundles/frontend/",
+    "public"     : {
+      "root"    : "web/assets/",
+      "scripts" : "${paths.public.root}javascripts/",
+      "styles"  : "${paths.public.root}stylesheets/",
+      "images"  : "${paths.public.root}images/",
+      "fonts"   : "${paths.public.root}fonts/"
+    }
+  },
+  "files" : {
+    "app" : {
+      "scripts" : {
+        "app": "javascripts/app.js",
+        "website": "javascripts/website.js",
+        "plugins": "javascripts/plugins.js"
+      },
+      "styles" : {
+        "app": "stylesheets/app.scss",
+        "website": "stylesheets/app.scss",
+        "plugins": "stylesheets/plugins.scss"
+      },
+      "images" : [],
+      "fonts"  : []
+    },
+    "plugins" : {
+      "scripts" : [
+        "${paths.components}jquery/dist/jquery.js",
+        "${paths.components}bootstrap/js/dist/util.js",
+        "${paths.components}bootstrap/js/dist/alert.js",
+        "${paths.components}bootstrap/js/dist/button.js",
+        "${paths.components}bootstrap/js/dist/carousel.js",
+        "${paths.components}bootstrap/js/dist/collapse.js",
+        "${paths.components}bootstrap/js/dist/dropdown.js",
+        "${paths.components}bootstrap/js/dist/modal.js",
+        "${paths.components}bootstrap/js/dist/scrollspy.js",
+        "${paths.components}bootstrap/js/dist/tab.js",
+        "${paths.components}bootstrap/js/dist/tooltip.js",
+        "${paths.components}bootstrap/js/dist/popover.js",
+        "${paths.components}jquery-smooth-scroll/jquery.smooth-scroll.js"
+      ],
+      "styles" : [],
+      "images" : [
+        "${paths.components}jquery-fancy-box/source/img/*.png",
+        "${paths.components}jquery-fancy-box/source/img/*.gif"
+      ],
+      "fonts" : [
+        "${paths.components}bootstrap-sass/assets/fonts/bootstrap/*",
+        "${paths.components}font-awesome/fonts/*",
+        "${paths.components}ionicons/fonts/*"
+      ]
+    }
+  },
+  "globs" : {
+    "tests": {
+      "scripts" : [ "${paths.app}**/app.js", ".gulp/config-reader.babel.js", ".gulp/gulp-runner.babel.js" ],
+      "styles"  : [ "${paths.app}**/*.scss" ],
+      "fonts"   : [],
+      "images"  : []
+    }
+  },
+  "options" : {
+    "rc": {
+      "js-cs":    "${paths.app}javascripts/rc/js-cs.json",
+      "js-hint":  "${paths.app}javascripts/rc/js-hint.json",
+      "css-lint": "${paths.app}stylesheets/rc/css-lint.json",
+      "css-comb": "${paths.app}stylesheets/rc/css-comb.json"
+    },
+    "prefix-rule-set" : [ "last 2 version" ],
+    "banner-text"     : "\n/*!\n * This file is part of the `src-run/<%= pkg.name %>` project.\n *\n * (c) <%= pkg.author %>\n *\n * or the full copyright and license information, please view the LICENSE.md\n * file that was distributed with this source code.\n*/\n"
+  }
+}
