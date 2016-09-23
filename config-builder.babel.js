@@ -107,10 +107,10 @@ function loadConfig (file = false) {
 function loadConfigFile(file, context) {
   try {
     this.configObject = this::readAndParseConfig(file);
-    this.logger.info('Loaded %s configuration file: "%s"', context, file);
+    this.logger.info('Loaded %s configuration: %s', context, file);
     return true;
   } catch (e) {
-    this.logger.error('Unable to load %s config file "%s": [%s] %s', context, file, e.name, e.message);
+    this.logger.error('%s while loading %s configuration: %s. %s.', e.name, context, file, e.message);
     return false;
   }
 }

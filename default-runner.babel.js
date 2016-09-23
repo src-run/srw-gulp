@@ -10,8 +10,8 @@
 
 "use strict";
 
-import del  from 'del';
 import gulp from 'gulp';
+import del from 'del';
 import source from 'vinyl-source-stream';
 import buffer from 'vinyl-buffer';
 import loader from 'gulp-load-plugins';
@@ -160,7 +160,7 @@ gulp.task('make-styles', () => {
 
 /* define script tasks */
 
-gulp.task('make-scripts-app-core', () => {
+gulp.task('make-scripts-core', () => {
   return browserify({
       entries: configs.file('app.scripts'),
       debug: true
@@ -180,7 +180,7 @@ gulp.task('make-scripts-app-core', () => {
     .pipe(gulp.dest(configs.path('public.scripts')));
 });
 
-gulp.task('make-scripts-app-plugins', () => {
+gulp.task('make-scripts-plugins', () => {
   return gulp
     .src(configs.files('plugins.scripts'))
     .pipe(plugins.sourcemaps.init())
@@ -192,7 +192,7 @@ gulp.task('make-scripts-app-plugins', () => {
     .pipe(gulp.dest(configs.path('public.scripts')));
 });
 
-gulp.task('make-scripts-app', () => {
+gulp.task('make-scripts-all', () => {
   return gulp
     .src([
       configs.path('public.scripts', {
@@ -219,10 +219,12 @@ gulp.task('make-scripts-app', () => {
     .pipe(gulp.dest(configs.path('public.scripts')));
 });
 
-gulp.task('make-scripts', gulp.series(gulp.parallel(
-  'make-scripts-app-core',
-  'make-scripts-app-plugins'),
-  'make-scripts-app'
+gulp.task('make-scripts', gulp.series(
+  gulp.parallel(
+    'make-scripts-core',
+    'make-scripts-plugins'
+  ),
+  'make-scripts-all'
 ));
 
 gulp.task('make', gulp.parallel(
@@ -230,7 +232,7 @@ gulp.task('make', gulp.parallel(
   'make-scripts'
 ));
 
-/* define top-level tasks */
+/* define top-level build tasks */
 
 gulp.task('build', gulp.series(
   gulp.parallel(
@@ -243,6 +245,8 @@ gulp.task('build', gulp.series(
   )
 ));
 
+/* define top-level watch tasks */
+
 gulp.task('watch', () => {
   gulp.watch(configs.globs('tests.styles'), gulp.series(
     'tests-styles',
@@ -254,6 +258,8 @@ gulp.task('watch', () => {
     'make-scripts'
   ));
 });
+
+/* define top-level default tasks */
 
 gulp.task('default', gulp.series(
   'build',
