@@ -73,7 +73,7 @@
       "css-lint": "${paths.app}stylesheets/rc/css-lint.json",
       "style-lint": "${paths.app}stylesheets/rc/style-lint.json"
     },
-    "prefix-rule-set": [
+    "browser-support": [
       "last 4 version"
     ],
     "banner-text": "\n/*!\n * This file is part of the `src-run/<%= pkg.name %>` project.\n *\n * (c) <%= pkg.author %>\n *\n * or the full copyright and license information, please view the LICENSE.md\n * file that was distributed with this source code.\n*/\n",

@@ -130,7 +130,10 @@ gulp.task('make-styles', () => {
     }))
     .pipe(plugins.postcss([
       require('postcss-cssnext')({
-        browsers: configs.option('prefix-rule-set')
+        browsers: configs.option('browser-support')
+      }),
+      require('autoprefixer')({
+        browsers: configs.option('browser-support')
       }),
       require('postcss-flexbugs-fixes'),
       require('postcss-sorting')({
