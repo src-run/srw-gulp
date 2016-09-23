@@ -15,26 +15,22 @@ import gulp from 'gulp';
 import source from 'vinyl-source-stream';
 import buffer from 'vinyl-buffer';
 import loader from 'gulp-load-plugins';
-import project  from './../package.json';
-
+import pkg  from './../package.json';
 import browserify from 'browserify';
 import babelify from 'babelify';
-import processFlexBoxBugs from 'postcss-flexbugs-fixes';
-import processCleanCss from 'postcss-clean';
-import processCssComb from 'csscomb';
-import processPrefixer from 'autoprefixer';
-import processCssNext from 'postcss-cssnext';
-import procesStripComments from 'postcss-strip-inline-comments';
-import syntaxScss from 'postcss-scss';
 
 import ConfigBuilder from './config-builder.babel.js';
 import ConfigFetcher from './config-fetcher.babel.js';
 import DefaultLogger from './default-logger.babel.js';
 
+/* setup our global variables */
+
 let plugins = loader();
 let logger  = new DefaultLogger(0, './gulp.log');
 let builder = new ConfigBuilder('./.gulp.json', logger);
 let configs = new ConfigFetcher(builder);
+
+/* define cleaning tasks */
 
 gulp.task('clean-scripts', () => {
   return del(configs.paths('public.scripts'));
@@ -59,24 +55,29 @@ gulp.task('clean', gulp.parallel(
   'clean-fonts'
 ));
 
-gulp.task('tests-styles', () => {
-  let inputs = configs.globs('tests.styles');
+/* define testing tasks */
 
+gulp.task('tests-styles', () => {
   return gulp
-    .src(inputs)
-    .pipe(plugins.debug())
-    .pipe(plugins.sassLint());
+    .src(configs.globs('tests.styles'))
+    .pipe(plugins.postcss([
+      require('stylelint')({
+        configFile: configs.option('rc.style-lint')
+      }),
+      require("postcss-reporter")({
+        clearMessages: true
+      }),
+    ], {
+      parser: require('postcss-scss')
+    }));
 });
 
 gulp.task('tests-scripts', () => {
-  let inputs = configs.globs('tests.scripts');
-  let jscsConf = configs.option('rc.js-cs');
-
   return gulp
-    .src(inputs)
-    .pipe(plugins.debug())
+    .src(configs.globs('tests.scripts'))
     .pipe(plugins.jscs({
-      fix: true, configPath: jscsConf
+      fix: true,
+      configPath: configs.option('rc.js-cs')
     }))
     .pipe(plugins.jscs.reporter())
     .pipe(plugins.jscs.reporter('fail'));
@@ -87,24 +88,18 @@ gulp.task('tests', gulp.parallel(
   'tests-scripts'
 ));
 
-gulp.task('assets-images', () => {
-  let inputs = configs.files('plugins.images', 'app.images');
-  let output = configs.path('public.images');
+/* define asset tasks */
 
+gulp.task('assets-images', () => {
   return gulp
-    .src(inputs)
-    .pipe(plugins.debug())
-    .pipe(gulp.dest(output));
+    .src(configs.files('plugins.images', 'app.images'))
+    .pipe(gulp.dest(configs.path('public.images')));
 });
 
 gulp.task('assets-fonts', () => {
-  let inputs = configs.files('plugins.fonts', 'app.fonts');
-  let output = configs.path('public.fonts');
-
   return gulp
-    .src(inputs)
-    .pipe(plugins.debug())
-    .pipe(gulp.dest(output));
+    .src(configs.files('plugins.fonts', 'app.fonts'))
+    .pipe(gulp.dest(configs.path('public.fonts')));
 });
 
 gulp.task('assets', gulp.parallel(
@@ -112,56 +107,63 @@ gulp.task('assets', gulp.parallel(
   'assets-fonts'
 ));
 
-gulp.task('make-styles', () => {
-  let banner = configs.option('banner-text');
-  let inputs = configs.file('app.styles');
-  let includes = configs.paths('components');
-  let browsers = configs.option('prefix-rule-set');
-  let cssCombConf = configs.option('rc.css-comb');
-  let output = configs.path('public.styles');
+/* define style tasks */
 
+gulp.task('make-styles', () => {
   return gulp
-    .src(inputs)
-    .pipe(plugins.debug())
+    .src(configs.file('app.styles'))
     .pipe(plugins.sourcemaps.init())
     .pipe(plugins.postcss([
-      processFlexBoxBugs(),
-      processCssNext({
-        browsers: browsers
+      require('postcss-strip-inline-comments'),
+      require('postcss-short'),
+      require('postcss-utilities'),
+      require('postcss-custom-properties'),
+      require('postcss-media-minmax'),
+      require("postcss-reporter")({
+        clearMessages: true
       }),
-      procesStripComments(),
     ], {
-      syntax: syntaxScss
+      parser: require('postcss-scss')
     }))
     .pipe(plugins.sass({
-      'includePaths': includes
+      'includePaths': configs.paths('components')
     }))
-    .pipe(plugins.csscomb({
-      config: cssCombConf
-    }))
+    .pipe(plugins.postcss([
+      require('postcss-cssnext')({
+        browsers: configs.option('prefix-rule-set')
+      }),
+      require('postcss-flexbugs-fixes'),
+      require('postcss-sorting')({
+        "sort-order": configs.option('sort-order')
+      }),
+      require("postcss-reporter")({
+        clearMessages: true
+      }),
+    ]))
     .pipe(plugins.decomment.text())
-    .pipe(plugins.banner(banner, {
-      pkg: project
+    .pipe(plugins.banner(configs.option('banner-text'), {
+      pkg: pkg
     }))
-    .pipe(gulp.dest(output))
+    .pipe(gulp.dest(configs.path('public.styles')))
     .pipe(plugins.rename({
       suffix: '.min'
     }))
     .pipe(plugins.postcss([
-      processCleanCss()
+      require('postcss-clean'),
+      require("postcss-reporter")({
+        clearMessages: true
+      }),
     ]))
     .pipe(plugins.sourcemaps.write('.'))
-    .pipe(gulp.dest(output));
+    .pipe(gulp.dest(configs.path('public.styles')));
 });
 
-gulp.task('make-scripts-app-core', () => {
-  let input = configs.file('app.scripts');
-  let banner = configs.option('banner-text');
-  let output = configs.path('public.scripts');
+/* define script tasks */
 
+gulp.task('make-scripts-app-core', () => {
   return browserify({
-      entries: input,
-      debug:   true
+      entries: configs.file('app.scripts'),
+      debug: true
     })
     .transform(babelify, {
       presets: [
@@ -172,59 +174,49 @@ gulp.task('make-scripts-app-core', () => {
     .pipe(source('app-core.js'))
     .pipe(buffer())
     .pipe(plugins.decomment())
-    .pipe(plugins.banner(banner, {
-      pkg: project
+    .pipe(plugins.banner(configs.option('banner-text'), {
+      pkg: pkg
     }))
-    .pipe(gulp.dest(output));
+    .pipe(gulp.dest(configs.path('public.scripts')));
 });
 
 gulp.task('make-scripts-app-plugins', () => {
-  let input = configs.files('plugins.scripts');
-  let banner = configs.option('banner-text');
-  let output = configs.path('public.scripts');
-
   return gulp
-    .src(input)
-    .pipe(plugins.debug())
+    .src(configs.files('plugins.scripts'))
     .pipe(plugins.sourcemaps.init())
     .pipe(plugins.concat('app-plugins.js'))
     .pipe(plugins.decomment())
-    .pipe(plugins.banner(banner, {
-      pkg: project
+    .pipe(plugins.banner(configs.option('banner-text'), {
+      pkg: pkg
     }))
-    .pipe(gulp.dest(output));
+    .pipe(gulp.dest(configs.path('public.scripts')));
 });
 
 gulp.task('make-scripts-app', () => {
-  let inputs = [
-    configs.path('public.scripts', {
-      post: 'app-plugins.js'
-    }),
-    configs.path('public.scripts', {
-      post: 'app-core.js'
-    })
-  ];
-  let banner = configs.option('banner-text');
-  let output = configs.path('public.scripts');
-
   return gulp
-    .src(inputs)
-    .pipe(plugins.debug())
+    .src([
+      configs.path('public.scripts', {
+        post: 'app-plugins.js'
+      }),
+      configs.path('public.scripts', {
+        post: 'app-core.js'
+      })
+    ])
     .pipe(plugins.sourcemaps.init())
     .pipe(plugins.concatSourcemap('app.js', {
       sourcesContent: true
     }))
     .pipe(plugins.decomment())
-    .pipe(plugins.banner(banner, {
-      pkg: project
+    .pipe(plugins.banner(configs.option('banner-text'), {
+      pkg: pkg
     }))
-    .pipe(gulp.dest(output))
+    .pipe(gulp.dest(configs.path('public.scripts')))
     .pipe(plugins.rename({
       suffix: '.min'
     }))
     .pipe(plugins.uglify())
     .pipe(plugins.sourcemaps.write('.'))
-    .pipe(gulp.dest(output));
+    .pipe(gulp.dest(configs.path('public.scripts')));
 });
 
 gulp.task('make-scripts', gulp.series(gulp.parallel(
@@ -238,6 +230,8 @@ gulp.task('make', gulp.parallel(
   'make-scripts'
 ));
 
+/* define top-level tasks */
+
 gulp.task('build', gulp.series(
   gulp.parallel(
     'tests',
@@ -250,15 +244,12 @@ gulp.task('build', gulp.series(
 ));
 
 gulp.task('watch', () => {
-  let styleGlobs = configs.globs('tests.styles');
-  let scriptGlobs = configs.globs('tests.scripts');
-
-  gulp.watch(styleGlobs, gulp.series(
+  gulp.watch(configs.globs('tests.styles'), gulp.series(
     'tests-styles',
     'make-styles'
   ));
 
-  gulp.watch(scriptGlobs, gulp.series(
+  gulp.watch(configs.globs('tests.scripts'), gulp.series(
     'tests-scripts',
     'make-scripts'
   ));

@@ -13,7 +13,7 @@
 import path from 'path';
 import fs from 'fs';
 
-var colors = require('colors/safe');
+var colors = require('colour');
 var dateFormat = require('dateformat');
 var sprintf = require('sprintf-js').sprintf;
 
@@ -196,7 +196,7 @@ function formatMessage (message, ...replacements) {
  *
  * @return {String}
  */
-function formatTime(format = 'HHMMss') {
+function formatTime(format = 'HH\:MM\:ss') {
   let date = new Date();
   let time = dateFormat(date, format);
 
@@ -211,37 +211,60 @@ function formatTime(format = 'HHMMss') {
  * @return {Array}
  */
 function formatLevel(level) {
+  let strings = [
+    'DEBUG',
+    'INFO',
+    'WARN',
+    'ERROR',
+    'CRIT',
+    'EMERGENCY',
+  ];
+
+  let symbols = [
+    '---',
+    '---',
+    '-!-',
+    '!!!',
+    '-#-',
+    '###',
+  ];
+
+  let out = sprintf('%s %s', symbols[level + 1], ("     " + strings[level + 1]).slice(-5));
+
+  return this::isColorEnabled() ? this::colorizeLevel(out, level) : out;
+}
+
+/**
+ * Colorize string based on level integer.
+ *
+ * @param  {String}  text
+ * @param  {integer} level
+ *
+ * @return {String}
+ */
+function colorizeLevel(text, level) {
   switch (level) {
     case -1:
-      level = [colors.magenta('DEBUG'), 'DEBUG'];
-      break;
+      return colors.magenta(text);
 
     case 0:
-      level = [colors.blue('INFO '), 'INFO '];
-      break;
+      return colors.blue(text);
 
     case 1:
-      level = [colors.cyan('WARN '), 'WARN '];
-      break;
+      return colors.yellow(text);
 
     case 2:
-      level = [colors.yellow('ERROR'), 'ERROR'];
-      break;
+      return colors.red(text);
 
     case 3:
-      level = [colors.red('CRIT '), 'CRIT '];
-      break;
+      return colors.red.bold(text);
 
     case 4:
-      level = [colors.red.bold('EMERG'), 'EMERG'];
-      break;
+      return colors.yellow.bold(text);
 
     default:
-      level = [colors.gray('UNDEF'), 'UNDEF'];
-      break;
+      return colors.gray(text);
   }
-
-  return this::isColorEnabled() ? level[0] : level[1];
 }
 
 /**

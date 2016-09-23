@@ -78,19 +78,40 @@ export default class ConfigBuilder {
  *
  * @return {Boolean}
  */
-function loadConfig (configFile) {
-  if (!configFile || !fs.statSync(configFile).isFile()) {
-    configFile = './.gulp.json';
+function loadConfig (file = false) {
+  let context;
+
+  if (file === false || ! fs.statSync(file).isFile()) {
+    file = './.gulp.json';
   }
 
-  let error = 'Using gulp config file %s (%s)';
+  if (this::loadConfigFile(file, 'user')) {
+    return;
+  }
 
+  if (this::loadConfigFile(this.configFileDefault, 'default')) {
+    return;
+  }
+
+  this.logger.emergency('Could not load user config or default config files.');
+}
+
+/**
+ * Load configuration object given passed file and context.
+ *
+ * @param  {String} file
+ * @param  {String} context
+ *
+ * @return {Boolean}
+ */
+function loadConfigFile(file, context) {
   try {
-    this.configObject = this::readAndParseConfig(configFile);
-    this.logger.debug(error, configFile, 'user');
-  } catch (Error) {
-    this.configObject = this::readAndParseConfig(this.configFileDefault);
-    this.logger.debug(error, configFile, 'default');
+    this.configObject = this::readAndParseConfig(file);
+    this.logger.info('Loaded %s configuration file: "%s"', context, file);
+    return true;
+  } catch (e) {
+    this.logger.error('Unable to load %s config file "%s": [%s] %s', context, file, e.name, e.message);
+    return false;
   }
 }
 
@@ -102,20 +123,9 @@ function loadConfig (configFile) {
  * @returns {*}
  */
 function readAndParseConfig (file) {
-  return JSON.parse(this::readConfig(file));
-}
-
-/**
- * Read the configObject file.
- *
- * @param {String} file
- *
- * @returns {*}
- */
-function readConfig (file) {
-  return fs.readFileSync(file, {
+  return JSON.parse(fs.readFileSync(file, {
     encoding: 'utf8'
-  });
+  }));
 }
 
 /**
