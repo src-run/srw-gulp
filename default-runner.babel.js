@@ -56,6 +56,22 @@ gulp.task('clean', gulp.parallel(
   'clean-fonts'
 ));
 
+/* define build tasks */
+
+let pluginBuildDescs = configs.plugin('builds');
+let pluginBuildNames = Object.keys(pluginBuildDescs);
+
+for(let p of pluginBuildNames){
+    gulp.task('make-dependency-'+p, shell.task(pluginBuildDescs[p].cmd, {
+        cwd: pluginBuildDescs[p].cwd,
+        quiet: true
+    }));
+}
+
+gulp.task('make-dependency', gulp.series(...pluginBuildNames.map(function (p) {
+    return 'make-dependency-'+p;
+})));
+
 /* define testing tasks */
 
 gulp.task('tests-styles', () => {
@@ -107,22 +123,6 @@ gulp.task('assets', gulp.parallel(
   'assets-images',
   'assets-fonts'
 ));
-
-/* define build tasks */
-
-let pluginBuildDescs = configs.plugin('builds');
-let pluginBuildNames = Object.keys(pluginBuildDescs);
-
-for(let p of pluginBuildNames){
-    gulp.task('make-dependency-'+p, shell.task(pluginBuildDescs[p].cmd, {
-        cwd: pluginBuildDescs[p].cwd,
-        quiet: true
-    }));
-}
-
-gulp.task('make-dependency', gulp.parallel(...pluginBuildNames.map(function (p) {
-    return 'make-dependency-'+p;
-})));
 
 /* define style tasks */
 
@@ -252,11 +252,11 @@ gulp.task('make', gulp.parallel(
 /* define top-level build tasks */
 
 gulp.task('build', gulp.series(
-  gulp.parallel(
-    'tests',
+  gulp.series(
     'clean',
+    'make-dependency',
+    'tests',
   ),
-  'make-dependency',
   gulp.parallel(
     'make',
     'assets'
