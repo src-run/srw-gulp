@@ -17,6 +17,7 @@ export default class ConfigBuilder {
    * Construct our configObject object instance.
    *
    * @param {String} configFile
+   * @param {DefaultLogger} logger
    */
   constructor (configFile, logger) {
     this.logger = logger;

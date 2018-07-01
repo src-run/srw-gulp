@@ -45,8 +45,17 @@
       "fonts": [
         "${paths.components}bootstrap-sass/assets/fonts/bootstrap/*",
         "${paths.components}font-awesome/fonts/*",
-        "${paths.components}ionicons/fonts/*"
-      ]
+        "${paths.components}ionicons/dist/fonts/*"
+      ],
+      "builds": {
+        "ionicons": {
+          "cwd": "${paths.components}ionicons/",
+          "cmd": [
+            "npm install",
+            "npm run build"
+          ]
+        }
+      }
     }
   },
   "globs": {

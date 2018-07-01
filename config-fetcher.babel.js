@@ -44,17 +44,41 @@ export default class ConfigFetcher {
     return this.reader.value('paths', index, options);
   }
 
-  /**
-   * Get file path from config.
-   *
-   * @param {string} index
-   * @param {Array}  options
-   *
-   * @returns {*}
-   */
-  file (index, options) {
-    return this.reader.value('files', index, options);
-  }
+    /**
+     * Get file path from config.
+     *
+     * @param {string} index
+     * @param {Array}  options
+     *
+     * @returns {*}
+     */
+    file (index, options) {
+        return this.reader.value('files', index, options);
+    }
+
+    /**
+     * Get file path from config.
+     *
+     * @param {string} index
+     * @param {Array}  options
+     *
+     * @returns {*}
+     */
+    plugin (index, options) {
+        return this.file('plugins.'+index, options);
+    }
+
+    /**
+     * Get file path from config.
+     *
+     * @param {string} index
+     * @param {Array}  options
+     *
+     * @returns {*}
+     */
+    pluginBuilds (index, options) {
+        return this.plugin('builds.'+index, options);
+    }
 
   /**
    * Get option value from config.

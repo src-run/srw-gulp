@@ -18,6 +18,7 @@ import loader from 'gulp-load-plugins';
 import pkg  from './../package.json';
 import browserify from 'browserify';
 import babelify from 'babelify';
+import shell from 'gulp-shell';
 
 import ConfigBuilder from './config-builder.babel.js';
 import ConfigFetcher from './config-fetcher.babel.js';
@@ -25,10 +26,10 @@ import DefaultLogger from './default-logger.babel.js';
 
 /* setup our global variables */
 
-let plugins = loader();
-let logger  = new DefaultLogger(0, './gulp.log');
-let builder = new ConfigBuilder('./.gulp.json', logger);
-let configs = new ConfigFetcher(builder);
+const plugins = loader();
+const logger  = new DefaultLogger(0, './gulp.log');
+const builder = new ConfigBuilder('./.gulp.json', logger);
+const configs = new ConfigFetcher(builder);
 
 /* define cleaning tasks */
 
@@ -106,6 +107,22 @@ gulp.task('assets', gulp.parallel(
   'assets-images',
   'assets-fonts'
 ));
+
+/* define build tasks */
+
+let pluginBuildDescs = configs.plugin('builds');
+let pluginBuildNames = Object.keys(pluginBuildDescs);
+
+for(let p of pluginBuildNames){
+    gulp.task('make-dependency-'+p, shell.task(pluginBuildDescs[p].cmd, {
+        cwd: pluginBuildDescs[p].cwd,
+        quiet: true
+    }));
+}
+
+gulp.task('make-dependency', gulp.parallel(...pluginBuildNames.map(function (p) {
+    return 'make-dependency-'+p;
+})));
 
 /* define style tasks */
 
@@ -237,8 +254,9 @@ gulp.task('make', gulp.parallel(
 gulp.task('build', gulp.series(
   gulp.parallel(
     'tests',
-    'clean'
+    'clean',
   ),
+  'make-dependency',
   gulp.parallel(
     'make',
     'assets'
@@ -252,7 +270,6 @@ gulp.task('watch', () => {
     'tests-styles',
     'make-styles'
   ));
-
   gulp.watch(configs.globs('tests.scripts'), gulp.series(
     'tests-scripts',
     'make-scripts'

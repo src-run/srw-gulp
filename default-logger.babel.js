@@ -13,9 +13,9 @@
 import path from 'path';
 import fs from 'fs';
 
-var colors = require('colour');
-var dateFormat = require('dateformat');
-var sprintf = require('sprintf-js').sprintf;
+let colors = require('colour');
+let dateFormat = require('dateformat');
+let sprintf = require('sprintf-js').sprintf;
 
 /**
  * Logger class.
@@ -25,6 +25,7 @@ export default class DefaultLogger
   /**
    * Configure verbose behavior of logger.
    *
+   * @param {integer} verbosity
    * @param {String} logFile
    */
   constructor (verbosity = 0, logFile = "/tmp/gulp-runner.log") {
@@ -67,7 +68,8 @@ export default class DefaultLogger
   /**
    * Write message lines with info severity.
    *
-   * @param {String...} lines
+   * @param {String} message
+   * @param {String...} replacements
    */
   debug(message, ...replacements) {
     if (this.isVerbose()) {
@@ -80,7 +82,8 @@ export default class DefaultLogger
   /**
    * Write message lines with info severity.
    *
-   * @param {String...} lines
+   * @param {String} message
+   * @param {String...} replacements
    */
   info(message, ...replacements) {
     if (!this.isQuiet()) {
@@ -93,7 +96,8 @@ export default class DefaultLogger
   /**
    * Write message lines with info severity.
    *
-   * @param {String...} lines
+   * @param {String} message
+   * @param {String...} replacements
    */
   warning(message, ...replacements) {
     if (!this.isQuiet()) {
@@ -106,7 +110,8 @@ export default class DefaultLogger
   /**
    * Write message lines with info severity.
    *
-   * @param {String...} lines
+   * @param {String} message
+   * @param {String...} replacements
    */
   error(message, ...replacements) {
     if (!this.isSilent()) {
@@ -119,7 +124,8 @@ export default class DefaultLogger
   /**
    * Write message lines with info severity.
    *
-   * @param {String...} lines
+   * @param {String} message
+   * @param {String...} replacements
    */
   critical(message, ...replacements) {
     if (!this.isSilent()) {
@@ -132,7 +138,8 @@ export default class DefaultLogger
   /**
    * Write message lines with info severity.
    *
-   * @param {String...} lines
+   * @param {String} message
+   * @param {String...} replacements
    */
   emergency(message, ...replacements) {
     this.writer.write(message, 4, ...replacements);
@@ -274,10 +281,7 @@ class WriterProxy {
   /**
    * Constructor allows enabling/disabling and setting a level cut off.
    *
-   * @param {Boolean} enableStdIO
-   * @param {Boolean} enableFile
-   * @param {String}  logFile
-   * @param {Integer} levelCutOff
+   * @param {Array} writers
    */
   constructor (...writers) {
     this.writers = writers;
@@ -334,6 +338,7 @@ class WriterFile {
    * Write log message to configured file.
    *
    * @param {String} message
+   * @param {Integer} level
    *
    * @return {FileWriter}
    */
@@ -375,7 +380,7 @@ function writeLine(text) {
 /**
  * Setup log file by creating the path and opening file handle (truncating mode).
  *
- * @param {String} filePath
+ * @param {String} file
  *
  * @return {FileWriter}
  */
@@ -423,8 +428,9 @@ class WriterStdIO {
    * Write log message to configured file.
    *
    * @param {String} message
+   * @param {Integer} level
    *
-   * @return {StdOutWriter}
+   * @return {WriterStdIO}
    */
   write (message, level = 0) {
     if (!this::isOpen()) {
@@ -443,7 +449,7 @@ class WriterStdIO {
   /**
    * Close log writer.
    *
-   * @return {StdOutWriter}
+   * @return {WriterStdIO}
    */
   close () {
     this::setLogClosed();
@@ -455,7 +461,7 @@ class WriterStdIO {
 /**
  * Returns true if log is open.
  *
- * @return {Boolean
+ * @return {Boolean}
  */
 function isOpen() {
   return ! this.closed;
@@ -464,7 +470,7 @@ function isOpen() {
 /**
  * Returns true if log is closed.
  *
- * @return {Boolean
+ * @return {Boolean}
  */
 function isClosed() {
   return this.closed;
